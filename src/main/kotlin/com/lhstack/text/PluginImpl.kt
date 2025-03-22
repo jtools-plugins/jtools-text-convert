@@ -86,7 +86,7 @@ class PluginImpl : IPlugin {
                                     if (text.isNotBlank()) {
                                         try {
                                             val splitStr = StringEscapeUtils.unescapeJava(splitterTextField.text)
-                                            val outputStr = text.split(splitStr).joinToString(joinTextField.text) {
+                                            val outputStr = text.split(splitStr).filter { it.isNotBlank() }.joinToString(joinTextField.text) {
                                                 mapTextField.text.replace("\${value}", it)
                                             }
                                             output.text = outputStr
