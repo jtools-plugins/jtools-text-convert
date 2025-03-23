@@ -126,7 +126,20 @@ class PluginImpl : IPlugin {
                                             it.name.endsWith(".xlsx") -> {
                                                 it.inputStream.use { stream ->
                                                     try{
-                                                        input.text = ExcelUtil.getReader(stream).readAsText(false)
+                                                        val confirm = Messages.showOkCancelDialog(
+                                                            project,
+                                                            "是否跳过第一行",
+                                                            "提示",
+                                                            "确认",
+                                                            "取消",
+                                                            AllIcons.Actions.Checked
+                                                        )
+
+                                                        var text = ExcelUtil.getReader(stream).readAsText(false)
+                                                        if(confirm == Messages.OK){
+                                                            text = text.split("\n").stream().skip(1).toList().joinToString("\n")
+                                                        }
+                                                        input.text = text
                                                     }catch (e:Throwable){
                                                         Helper.getSysLogger(project.locationHash)
                                                             .info(e.message + "\n" + e.stackTrace.joinToString("\n") { err -> err.toString() })
