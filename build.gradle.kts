@@ -1,4 +1,4 @@
-//import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
 plugins {
     id("java")
@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "com.lhstack"
-version = "0.0.1"
+version = "0.0.2"
 
 
 repositories {
@@ -25,6 +25,8 @@ intellij {
 
 dependencies {
     implementation(files("C:/Users/lhstack/.jtools/sdk/sdk.jar"))
+    implementation("cn.hutool:hutool-poi:5.8.36")
+    implementation("org.apache.poi:poi-ooxml:5.0.0")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 tasks {
@@ -42,16 +44,16 @@ tasks {
         archiveBaseName = "jtools-text-convert"
     }
 
-//    withType<ShadowJar> {
-//        transform(com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer::class.java)
-//        transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer::class.java)
-//        transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer::class.java)
-//        exclude("META-INF/MANIFEST.MF","META-INF/*.SF","META-INF/*.DSA")
-//        dependencies {
-//            exclude(dependency("com.jetbrains.*:.*:.*"))
-//            exclude(dependency("org.jetbrains.*:.*:.*"))
-//        }
-//    }
+    withType<ShadowJar> {
+        transform(com.github.jengelman.gradle.plugins.shadow.transformers.ServiceFileTransformer::class.java)
+        transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer::class.java)
+        transform(com.github.jengelman.gradle.plugins.shadow.transformers.XmlAppendingTransformer::class.java)
+        exclude("META-INF/MANIFEST.MF","META-INF/*.SF","META-INF/*.DSA")
+        dependencies {
+            exclude(dependency("com.jetbrains.*:.*:.*"))
+            exclude(dependency("org.jetbrains.*:.*:.*"))
+        }
+    }
 
     withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         kotlinOptions.jvmTarget = "11"
