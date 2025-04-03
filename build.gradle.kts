@@ -24,9 +24,10 @@ intellij {
 }
 
 dependencies {
-    implementation(files("C:/Users/lhstack/.jtools/sdk/sdk.jar"))
     implementation("cn.hutool:hutool-poi:5.8.36")
     implementation("org.apache.poi:poi-ooxml:5.0.0")
+    implementation("org.springframework:spring-expression:5.3.39")
+    implementation(files("C:/Users/1/.jtools/sdk/sdk.jar"))
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 tasks {

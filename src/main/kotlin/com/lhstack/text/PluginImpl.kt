@@ -18,21 +18,43 @@ import com.intellij.ui.JBSplitter
 import com.lhstack.text.component.MultiLanguageTextField
 import com.lhstack.tools.plugins.Helper
 import com.lhstack.tools.plugins.IPlugin
+import io.ktor.utils.io.core.*
+import org.apache.commons.codec.binary.Hex
 import org.apache.commons.lang.StringEscapeUtils
+import org.springframework.expression.EvaluationContext
+import org.springframework.expression.spel.standard.SpelExpressionParser
+import org.springframework.expression.spel.support.StandardEvaluationContext
+import org.springframework.util.DigestUtils
 import java.awt.BorderLayout
 import java.awt.event.ComponentAdapter
 import java.awt.event.ComponentEvent
 import java.io.InputStreamReader
 import java.nio.charset.StandardCharsets
 import javax.swing.*
+import kotlin.io.use
 import kotlin.streams.toList
+import kotlin.text.toByteArray
 
+class Func{
+
+    companion object{
+        val INSTANCE = Func()
+    }
+    fun md5(value:String) = DigestUtils.md5DigestAsHex(value.toByteArray(StandardCharsets.UTF_8))
+
+    fun hex(value: String) = Hex.encodeHexString(value.toByteArray(StandardCharsets.UTF_8))
+
+    fun fillSingleQuote(value:String) = "'${value}'"
+
+    fun fillQuote(value:String,quote:String) = "${quote}${value}${quote}"
+}
 
 class PluginImpl : IPlugin {
 
     companion object {
         val CACHE = mutableMapOf<String, JComponent>()
         val DISPOSERS = mutableMapOf<String, Disposable>()
+        val PARSER = SpelExpressionParser()
     }
 
     override fun pluginIcon(): Icon = Helper.findIcon("pluginIcon.svg", PluginImpl::class.java)
@@ -57,7 +79,7 @@ class PluginImpl : IPlugin {
                     Disposer.register(disposable, output)
                     val splitterTextField = JTextField("\\n").apply { this.toolTipText = "默认\\n作为分隔符" }
                     val mapTextField =
-                        JTextField("'\${value}'").apply { this.toolTipText = "\${value}作为默认填充变量" }
+                        JTextField("fillSingleQuote(#value)").apply { this.toolTipText = "#value作为默认填充变量,可使用md5(#value)对值进行md5处理,现支持md5(str),hex(str),fillSingleQuote(str)[会在值两侧填充'符号],fillQuote(#value,\"quote\"),符号两侧填充指定字符串(quote)内容函数,表达式为spel,#value为上下文中传递的变量" }
                     val joinTextField = JTextField(",").apply { this.toolTipText = ",作为默认连接符号" }
                     splitter.firstComponent = JPanel(BorderLayout()).apply {
                         this.add(JPanel(BorderLayout()).apply {
@@ -177,8 +199,11 @@ class PluginImpl : IPlugin {
                                         try {
                                             val splitStr = StringEscapeUtils.unescapeJava(splitterTextField.text)
                                             val outputStr = text.split(splitStr).filter { it.isNotBlank() }
-                                                .joinToString(joinTextField.text) {
-                                                    mapTextField.text.replace("\${value}", it.trim())
+                                                .joinToString(StringEscapeUtils.unescapeJava(joinTextField.text)) {
+                                                    val expression = PARSER.parseExpression(mapTextField.text)
+                                                    val context = StandardEvaluationContext(Func.INSTANCE)
+                                                    context.setVariable("value", it.trim())
+                                                    expression.getValue(context)?.toString() ?: "null"
                                                 }
                                             output.text = outputStr
                                         } catch (e: Throwable) {

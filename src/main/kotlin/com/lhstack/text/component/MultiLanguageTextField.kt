@@ -77,6 +77,8 @@ class MultiLanguageTextField(
         editorEx.setBorder(null)
         editorListener.invoke(editorEx)
         val settings = editorEx.settings
+        //去掉折叠轮廓列,编辑器中
+        settings.isFoldingOutlineShown = false
         settings.additionalLinesCount = 0
         settings.additionalColumnsCount = 1
         settings.isLineNumbersShown = isLineNumbersShown
